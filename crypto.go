@@ -1,10 +1,7 @@
-package main
+package starsign
 
 import (
-	"bytes"
 	"encoding/base64"
-	"encoding/gob"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -13,23 +10,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
-func main() {
-	data := []byte("testing")
-	sig := sign(data)
-	out := fmt.Sprintf("%s %s", sig.Format, base64.StdEncoding.EncodeToString(sig.Blob))
-	fmt.Println(out)
-
-	s, _ := serialiseSignature(sig)
-	sig, _ = deserialiseSignature(s)
-
-	if err := verify(data, sig); err != nil {
-		fmt.Println("!!! SIGNATURE VERIFICATION FAILED !!!")
-	} else {
-		fmt.Println("Signature ok")
-	}
-}
-
-func sign(data []byte) *ssh.Signature {
+func Sign(data []byte) *ssh.Signature {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
@@ -49,28 +30,7 @@ func sign(data []byte) *ssh.Signature {
 	return sig
 }
 
-func serialiseSignature(sig *ssh.Signature) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(sig)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func deserialiseSignature(data []byte) (*ssh.Signature, error) {
-	sig := new(ssh.Signature)
-	buf := bytes.NewBuffer(data)
-	dec := gob.NewDecoder(buf)
-	err := dec.Decode(sig)
-	if err != nil {
-		return nil, err
-	}
-	return sig, nil
-}
-
-func verify(data []byte, sig *ssh.Signature) error {
+func Verify(data []byte, sig *ssh.Signature) error {
 	key := dummyTestingKey()
 	return key.Verify(data, sig)
 }
