@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	"github.com/CHTJonas/starsign"
@@ -9,13 +8,15 @@ import (
 
 func main() {
 	data := []byte("testing")
-	sig := starsign.Sign(data)
-	out := fmt.Sprintf("%s %s", sig.Format, base64.StdEncoding.EncodeToString(sig.Blob))
-	fmt.Println(out)
 
-	s, _ := starsign.EncodeSignature(sig)
-	sig, _ = starsign.DecodeSignature(s)
+	sig := starsign.Sign(data)
+	bufW, _ := starsign.GetFileWriter("sig.txt")
+	starsign.EncodeSignature(bufW, sig)
+	bufW.Flush()
+
 	key, _ := starsign.ReadPubKeyFile("/Users/charlie/.ssh/yk.pub")
+	bufR, _ := starsign.GetFileReader("sig.txt")
+	sig, _ = starsign.DecodeSignature(bufR)
 
 	if err := starsign.Verify(data, key, sig); err != nil {
 		fmt.Println("!!! SIGNATURE VERIFICATION FAILED !!!")

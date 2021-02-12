@@ -1,7 +1,9 @@
 package starsign
 
 import (
+	"bufio"
 	"io/ioutil"
+	"os"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -13,4 +15,20 @@ func ReadPubKeyFile(path string) (ssh.PublicKey, error) {
 	}
 	key, _, _, _, err := ssh.ParseAuthorizedKey(data)
 	return key, err
+}
+
+func GetFileWriter(path string) (*bufio.Writer, error) {
+	file, err := os.Create(path)
+	if err != nil {
+		return nil, err
+	}
+	return bufio.NewWriter(file), nil
+}
+
+func GetFileReader(path string) (*bufio.Reader, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	return bufio.NewReader(file), nil
 }
