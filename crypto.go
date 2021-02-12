@@ -1,7 +1,6 @@
 package starsign
 
 import (
-	"encoding/base64"
 	"log"
 	"net"
 	"os"
@@ -30,20 +29,6 @@ func Sign(data []byte) *ssh.Signature {
 	return sig
 }
 
-func Verify(data []byte, sig *ssh.Signature) error {
-	key := dummyTestingKey()
+func Verify(data []byte, key ssh.PublicKey, sig *ssh.Signature) error {
 	return key.Verify(data, sig)
-}
-
-func dummyTestingKey() *agent.Key {
-	fingerprint := "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCsu/KmxxHvrQy4OorfEqF5zLfxk/QFDYs2MweLCvZjhkvUr6xKV6GXYH3W5Rq6BSKIzj3qqAB9yZ5G5oXXEjPs="
-	blob, err := base64.StdEncoding.DecodeString(fingerprint)
-	if err != nil {
-		log.Fatalf("Failed to deserialise key: %v", err)
-	}
-	return &agent.Key{
-		Format:  "ecdsa-sha2-nistp256",
-		Blob:    blob,
-		Comment: "yubikey-5-nfc",
-	}
 }

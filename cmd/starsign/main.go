@@ -15,8 +15,9 @@ func main() {
 
 	s, _ := starsign.EncodeSignature(sig)
 	sig, _ = starsign.DecodeSignature(s)
+	key, _ := starsign.ReadPubKeyFile("/Users/charlie/.ssh/yk.pub")
 
-	if err := starsign.Verify(data, sig); err != nil {
+	if err := starsign.Verify(data, key, sig); err != nil {
 		fmt.Println("!!! SIGNATURE VERIFICATION FAILED !!!")
 	} else {
 		fmt.Println("Signature ok")
