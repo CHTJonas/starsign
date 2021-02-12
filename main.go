@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net"
@@ -16,6 +18,10 @@ func main() {
 	sig := sign(data)
 	out := fmt.Sprintf("%s %s", sig.Format, base64.StdEncoding.EncodeToString(sig.Blob))
 	fmt.Println(out)
+
+	s, _ := serialiseSignature(sig)
+	sig, _ = deserialiseSignature(s)
+
 	if err := verify(data, sig); err != nil {
 		fmt.Println("!!! SIGNATURE VERIFICATION FAILED !!!")
 	} else {
@@ -43,16 +49,41 @@ func sign(data []byte) *ssh.Signature {
 	return sig
 }
 
+func serialiseSignature(sig *ssh.Signature) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(sig)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func deserialiseSignature(data []byte) (*ssh.Signature, error) {
+	sig := new(ssh.Signature)
+	buf := bytes.NewBuffer(data)
+	dec := gob.NewDecoder(buf)
+	err := dec.Decode(sig)
+	if err != nil {
+		return nil, err
+	}
+	return sig, nil
+}
+
 func verify(data []byte, sig *ssh.Signature) error {
+	key := dummyTestingKey()
+	return key.Verify(data, sig)
+}
+
+func dummyTestingKey() *agent.Key {
 	fingerprint := "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCsu/KmxxHvrQy4OorfEqF5zLfxk/QFDYs2MweLCvZjhkvUr6xKV6GXYH3W5Rq6BSKIzj3qqAB9yZ5G5oXXEjPs="
 	blob, err := base64.StdEncoding.DecodeString(fingerprint)
 	if err != nil {
 		log.Fatalf("Failed to deserialise key: %v", err)
 	}
-	key := &agent.Key{
+	return &agent.Key{
 		Format:  "ecdsa-sha2-nistp256",
 		Blob:    blob,
 		Comment: "yubikey-5-nfc",
 	}
-	return key.Verify(data, sig)
 }
