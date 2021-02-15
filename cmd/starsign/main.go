@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/CHTJonas/starsign"
@@ -10,12 +12,14 @@ import (
 
 var (
 	// Software version defaults to the value below but is overridden by the compiler in Makefile.
-	version     = "dev-edge"
+	version = "dev-edge"
+
+	// Command line flags.
 	versionFlag bool
 	licenseFlag bool
 	signFlag    bool
 	verifyFlag  bool
-	armorFlag   bool
+	pubKeyFlag  string
 	outFlag     string
 )
 
@@ -26,10 +30,10 @@ func init() {
 	flag.BoolVar(&signFlag, "sign", false, "generate a digital signature")
 	flag.BoolVar(&verifyFlag, "v", false, "verify a digital signature")
 	flag.BoolVar(&verifyFlag, "verify", false, "verify a digital signature")
-	flag.BoolVar(&armorFlag, "a", false, "generate armored output")
-	flag.BoolVar(&armorFlag, "armor", false, "generate armored output")
-	flag.StringVar(&outFlag, "o", "", "output to `FILE` (default is input filename with .star extension)")
-	flag.StringVar(&outFlag, "output", "", "output to `FILE` (default is input filename with .star extension)")
+	flag.StringVar(&pubKeyFlag, "p", "", "public key file to use when verifying")
+	flag.StringVar(&pubKeyFlag, "pubkey", "", "public key file to use when verifying")
+	flag.StringVar(&outFlag, "o", "", "file to write to when signing")
+	flag.StringVar(&outFlag, "output", "", "file to write to when signing")
 	flag.Parse()
 }
 
@@ -63,30 +67,93 @@ func main() {
 	}
 }
 
-var data = []byte("testing")
+func openFile(path string) *os.File {
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Failed to open file", path+":", err)
+		os.Exit(99)
+	}
+	return f
+}
+
+func createFile(path string) *os.File {
+	f, err := os.Create(path)
+	if err != nil {
+		fmt.Println("Failed to create file", path+":", err)
+		os.Exit(99)
+	}
+	return f
+}
 
 func sign() error {
-	sig := starsign.Sign(data)
-	bufW, err := starsign.GetFileWriter("sig.txt")
+	if flag.NArg() > 1 {
+		fmt.Println("Error: wrong number of arguments.")
+		fmt.Println("In signature mode Starsign accepts a single argument to specify the input file.")
+		os.Exit(1)
+	}
+
+	var (
+		in  io.Reader = os.Stdin
+		out io.Writer = os.Stdout
+	)
+	if inPath := flag.Arg(0); inPath != "" && inPath != "-" {
+		if outFlag == "" {
+			outFlag = inPath + ".starsig"
+		}
+		f := openFile(inPath)
+		defer f.Close()
+		in = f
+	}
+	if outFlag != "" && outFlag != "-" {
+		f := createFile(outFlag)
+		defer f.Close()
+		out = f
+	}
+
+	data, err := ioutil.ReadAll(in)
 	if err != nil {
 		return err
 	}
-	defer bufW.Flush()
-	return starsign.EncodeSignature(bufW, sig)
+	sig := starsign.Sign(data)
+	return starsign.EncodeSignature(out, sig)
 }
 
 func verify() error {
-	key, err := starsign.ReadPubKeyFile("/Users/charlie/.ssh/yk.pub")
+	if flag.NArg() < 1 || flag.NArg() > 2 {
+		fmt.Println("Error: wrong number of arguments.")
+		fmt.Println("In verification mode Starsign accepts a single argument to specify the input file and an optional argument to the signature file.")
+		os.Exit(1)
+	}
+	if pubKeyFlag == "" {
+		fmt.Println("Error: public key file not specified.")
+		os.Exit(1)
+	}
+
+	var d, s, k *os.File
+	dataPath := flag.Arg(0)
+	d = openFile(dataPath)
+	defer d.Close()
+	if sigPath := flag.Arg(1); sigPath != "" {
+		s = openFile(sigPath)
+		defer s.Close()
+	} else {
+		s = openFile(dataPath + ".starsig")
+		defer s.Close()
+	}
+	k = openFile(pubKeyFlag)
+	defer k.Close()
+
+	key, err := starsign.ReadPubKeyFile(k)
 	if err != nil {
 		return err
 	}
-	bufR, err := starsign.GetFileReader("sig.txt")
+	data, err := ioutil.ReadAll(d)
 	if err != nil {
 		return err
 	}
-	sig, err := starsign.DecodeSignature(bufR)
+	sig, err := starsign.DecodeSignature(s)
 	if err != nil {
 		return err
 	}
-	return starsign.Verify(data, key, sig)
+	return starsign.Verify(data, sig, key)
 }

@@ -29,6 +29,6 @@ func Sign(data []byte) *ssh.Signature {
 	return sig
 }
 
-func Verify(data []byte, key ssh.PublicKey, sig *ssh.Signature) error {
+func Verify(data []byte, sig *ssh.Signature, key ssh.PublicKey) error {
 	return key.Verify(data, sig)
 }

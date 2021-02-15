@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func EncodeSignature(buf io.Writer, sig *ssh.Signature) error {
-	enc := gob.NewEncoder(buf)
+func EncodeSignature(out io.Writer, sig *ssh.Signature) error {
+	enc := gob.NewEncoder(out)
 	err := enc.Encode(sig)
 	if err != nil {
 		return err
@@ -16,9 +16,9 @@ func EncodeSignature(buf io.Writer, sig *ssh.Signature) error {
 	return nil
 }
 
-func DecodeSignature(buf io.Reader) (*ssh.Signature, error) {
+func DecodeSignature(in io.Reader) (*ssh.Signature, error) {
 	sig := new(ssh.Signature)
-	dec := gob.NewDecoder(buf)
+	dec := gob.NewDecoder(in)
 	err := dec.Decode(sig)
 	if err != nil {
 		return nil, err
