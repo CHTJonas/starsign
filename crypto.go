@@ -1,7 +1,9 @@
 package starsign
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -12,12 +14,12 @@ import (
 )
 
 type Signature struct {
-	Hash [blake2b.Size]byte
+	Hash []byte
 	Sig  []byte
 	Type string
 }
 
-func Sign(data []byte) *Signature {
+func Sign(in io.Reader) *Signature {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
@@ -28,8 +30,11 @@ func Sign(data []byte) *Signature {
 	if err != nil {
 		log.Fatalf("Failed to list SSH keys: %v", err)
 	}
-	hash := blake2b.Sum512(data)
-	sig, err := client.Sign(keys[0], hash[:])
+	hash, err := hash(in)
+	if err != nil {
+		log.Fatalf("Failed to hash data: %v", err)
+	}
+	sig, err := client.Sign(keys[0], hash)
 	if err != nil {
 		log.Fatalf("Failed to sign: %v", err)
 	}
@@ -40,9 +45,12 @@ func Sign(data []byte) *Signature {
 	}
 }
 
-func Verify(data []byte, sig *Signature, key ssh.PublicKey) error {
-	hash := blake2b.Sum512(data)
-	if hash != sig.Hash {
+func Verify(in io.Reader, sig *Signature, key ssh.PublicKey) error {
+	hash, err := hash(in)
+	if err != nil {
+		return fmt.Errorf("Failed to hash data: %v", err)
+	}
+	if !bytes.Equal(hash, sig.Hash) {
 		return fmt.Errorf("Hash mismatch")
 	}
 	sshSig := &ssh.Signature{
@@ -50,4 +58,16 @@ func Verify(data []byte, sig *Signature, key ssh.PublicKey) error {
 		Blob:   sig.Sig,
 	}
 	return key.Verify(hash[:], sshSig)
+}
+
+func hash(in io.Reader) ([]byte, error) {
+	hasher, err := blake2b.New512(nil)
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(hasher, in)
+	if err != nil {
+		return nil, err
+	}
+	return hasher.Sum(nil), nil
 }

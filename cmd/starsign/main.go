@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/CHTJonas/starsign"
@@ -121,11 +120,7 @@ func sign() error {
 		out = f
 	}
 
-	data, err := ioutil.ReadAll(in)
-	if err != nil {
-		return err
-	}
-	sig := starsign.Sign(data)
+	sig := starsign.Sign(in)
 	return starsign.EncodeSignature(out, sig)
 }
 
@@ -158,13 +153,9 @@ func verify() error {
 	if err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(d)
-	if err != nil {
-		return err
-	}
 	sig, err := starsign.DecodeSignature(s)
 	if err != nil {
 		return err
 	}
-	return starsign.Verify(data, sig, key)
+	return starsign.Verify(d, sig, key)
 }
