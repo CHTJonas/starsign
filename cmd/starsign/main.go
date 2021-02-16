@@ -20,6 +20,7 @@ var (
 	verifyFlag  bool
 	pubKeyFlag  string
 	outFlag     string
+	verboseFlag bool
 )
 
 func init() {
@@ -36,6 +37,7 @@ func init() {
 	flag.StringVar(&pubKeyFlag, "pubkey", "", "public key file to use when verifying")
 	flag.StringVar(&outFlag, "o", "", "file to write to when signing")
 	flag.StringVar(&outFlag, "output", "", "file to write to when signing")
+	flag.BoolVar(&verboseFlag, "verbose", false, "print verbose error messages")
 	flag.Parse()
 }
 
@@ -52,6 +54,9 @@ func main() {
 	case signFlag:
 		if err := sign(); err != nil {
 			fmt.Println("Failed to generate signature")
+			if verboseFlag {
+				fmt.Println(err)
+			}
 			os.Exit(125)
 		}
 		fmt.Println("Signature generated")
@@ -59,6 +64,9 @@ func main() {
 	case verifyFlag:
 		if err := verify(); err != nil {
 			fmt.Println("!!! SIGNATURE VERIFICATION FAILED !!!")
+			if verboseFlag {
+				fmt.Println(err)
+			}
 			os.Exit(125)
 		}
 		fmt.Println("Signature ok")

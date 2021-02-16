@@ -27,6 +27,7 @@ Mode flags:
 Option flags:
     -o, --output OUTPUT         Write the signature to the file at path OUTPUT.
     -p, --pubkey PUBLICKEY      Read in public key from the file at path PUBLICKEY.
+    --verbose                   Print verbose error messages when signing or verifying.
 
 In sign mode, Starsign takes an argument INPUT that determines the file to sign.
 This can be "-" in which case the input will be taken from the standard input. In
