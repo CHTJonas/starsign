@@ -24,6 +24,9 @@ var (
 )
 
 func init() {
+	flag.Usage = func() {
+		fmt.Println(usage)
+	}
 	flag.BoolVar(&versionFlag, "V", false, "print the version")
 	flag.BoolVar(&versionFlag, "version", false, "print the version")
 	flag.BoolVar(&signFlag, "s", false, "generate a digital signature")
