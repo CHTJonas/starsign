@@ -86,17 +86,23 @@ func createFile(path string) *os.File {
 }
 
 func sign() error {
-	if flag.NArg() > 1 {
+	var (
+		in  io.Reader
+		out io.Writer
+	)
+
+	inPath := flag.Arg(0)
+	if flag.NArg() != 1 || inPath == "" {
 		fmt.Println("Error: wrong number of arguments.")
 		fmt.Println("In signature mode Starsign accepts a single argument to specify the input file.")
 		os.Exit(1)
 	}
-
-	var (
-		in  io.Reader = os.Stdin
-		out io.Writer = os.Stdout
-	)
-	if inPath := flag.Arg(0); inPath != "" && inPath != "-" {
+	if inPath == "-" {
+		if outFlag == "" {
+			outFlag = "-"
+		}
+		in = os.Stdin
+	} else {
 		if outFlag == "" {
 			outFlag = inPath + ".starsig"
 		}
@@ -104,7 +110,9 @@ func sign() error {
 		defer f.Close()
 		in = f
 	}
-	if outFlag != "" && outFlag != "-" {
+	if outFlag == "-" {
+		out = os.Stdout
+	} else {
 		f := createFile(outFlag)
 		defer f.Close()
 		out = f
