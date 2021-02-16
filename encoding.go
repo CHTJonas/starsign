@@ -4,11 +4,9 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"io"
-
-	"golang.org/x/crypto/ssh"
 )
 
-func EncodeSignature(out io.Writer, sig *ssh.Signature) error {
+func EncodeSignature(out io.Writer, sig *Signature) error {
 	b64 := base64.NewEncoder(base64.StdEncoding, out)
 	enc := gob.NewEncoder(b64)
 	err := enc.Encode(sig)
@@ -21,9 +19,9 @@ func EncodeSignature(out io.Writer, sig *ssh.Signature) error {
 	return nil
 }
 
-func DecodeSignature(in io.Reader) (*ssh.Signature, error) {
+func DecodeSignature(in io.Reader) (*Signature, error) {
+	sig := new(Signature)
 	b64 := base64.NewDecoder(base64.StdEncoding, in)
-	sig := new(ssh.Signature)
 	dec := gob.NewDecoder(b64)
 	err := dec.Decode(sig)
 	if err != nil {
