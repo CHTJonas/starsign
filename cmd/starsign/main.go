@@ -120,7 +120,10 @@ func sign() error {
 		out = f
 	}
 
-	sig := starsign.Sign(in)
+	sig, err := starsign.Sign(in)
+	if err != nil {
+		return err
+	}
 	return starsign.EncodeSignature(out, sig)
 }
 

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 
@@ -19,30 +18,30 @@ type Signature struct {
 	Type string
 }
 
-func Sign(in io.Reader) *Signature {
+func Sign(in io.Reader) (*Signature, error) {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		log.Fatalf("Failed to open SSH_AUTH_SOCK: %v", err)
+		return nil, fmt.Errorf("Failed to open SSH_AUTH_SOCK: %v", err)
 	}
 	client := agent.NewClient(conn)
 	keys, err := client.List()
 	if err != nil {
-		log.Fatalf("Failed to list SSH keys: %v", err)
+		return nil, fmt.Errorf("Failed to list SSH keys: %v", err)
 	}
 	hash, err := hash(in)
 	if err != nil {
-		log.Fatalf("Failed to hash data: %v", err)
+		return nil, fmt.Errorf("Failed to hash data: %v", err)
 	}
 	sig, err := client.Sign(keys[0], hash)
 	if err != nil {
-		log.Fatalf("Failed to sign: %v", err)
+		return nil, fmt.Errorf("Failed to sign data: %v", err)
 	}
 	return &Signature{
 		Hash: hash,
 		Sig:  sig.Blob,
 		Type: sig.Format,
-	}
+	}, nil
 }
 
 func Verify(in io.Reader, sig *Signature, key ssh.PublicKey) error {
