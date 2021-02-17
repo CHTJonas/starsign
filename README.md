@@ -23,6 +23,8 @@ Usage:
 Mode flags:
     -s, --sign                  Sign a file
     -v, --verify                Verify a signature
+    -V, --version               Print version and exit
+    -l, --license               Print license and exit
 
 Option flags:
     -o, --output OUTPUT         Write the signature to the file at path OUTPUT.

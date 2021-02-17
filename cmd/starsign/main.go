@@ -29,6 +29,8 @@ func init() {
 	}
 	flag.BoolVar(&versionFlag, "V", false, "print the version")
 	flag.BoolVar(&versionFlag, "version", false, "print the version")
+	flag.BoolVar(&licenseFlag, "l", false, "print the license")
+	flag.BoolVar(&licenseFlag, "license", false, "print the license")
 	flag.BoolVar(&signFlag, "s", false, "generate a digital signature")
 	flag.BoolVar(&signFlag, "sign", false, "generate a digital signature")
 	flag.BoolVar(&verifyFlag, "v", false, "verify a digital signature")
