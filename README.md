@@ -13,6 +13,10 @@ There's already a myriad of other crypto tools and libraries out there for manag
 
 If you think those all sound like good ideas then Starsign may be for you.
 
+## How it works
+
+Starsign generates a 64-byte BLAKE2 hash of the input data and then signs this using the first SSH key that's available and loaded into your SSH agent. Make sure that the `SSH_AUTH_SOCK` variable contains the path to your agent's UNIX socket!
+
 ## Usage
 
 ```
@@ -48,9 +52,14 @@ Example usage:
     $ starsign -v -p ~/.ssh/id_rsa.pub message.txt message.sig
 ```
 
-## Compiling
+## Installation
 
-To build Starsign from source you will need a suitable [Go toolchain installed](https://golang.org/doc/install). After that just clone the project using Git and run Make! Cross-compilation is easy in Go so by default we compile binaries for various operating systems and processor architectures and place them all in `./bin`:
+Pre-built binaries for a variety of operating systems and architectures are available to download from [GitHub Releases](https://github.com/CHTJonas/starsign/releases). I will generate a `SHA256SUMS` file and sign it using the SSH key that resides on my YubiKey and which has the following fingerprint (which you can cross-check [here](https://chtj2.user.srcf.net/identity/authorized_keys) and [here](https://github.com/CHTJonas.keys)):
+```
+ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCsu/KmxxHvrQy4OorfEqF5zLfxk/QFDYs2MweLCvZjhkvUr6xKV6GXYH3W5Rq6BSKIzj3qqAB9yZ5G5oXXEjPs=
+```
+
+To compile Starsign from source you will need a suitable [Go toolchain installed](https://golang.org/doc/install). After that just clone the project using Git and run Make! Cross-compilation is easy in Go so by default we build for all targets and place the resulting executables in `./bin`:
 
 ```bash
 git checkout https://github.com/CHTJonas/starsign.git

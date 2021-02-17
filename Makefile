@@ -124,4 +124,15 @@ build: build/linux build/freebsd build/openbsd build/darwin build/windows
 clean:
 	@rm -rf bin
 
+sign:
+	sha256sum bin/* > bin/SHA256SUMS
+	go run cmd/starsign/*.go -s bin/SHA256SUMS
+
+archive:
+	tar -czf bin/binaries.tar.gz bin/*
+
 all: format build
+
+release:
+	make clean && make -j 6 all
+	make sign && make archive
