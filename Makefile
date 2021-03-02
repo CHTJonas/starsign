@@ -129,7 +129,7 @@ sign:
 	go run cmd/starsign/*.go -s bin/SHA256SUMS
 
 archive:
-	tar -czf bin/binaries.tar.gz bin/*
+	tar -czf bin/starsign-$(VER:v%=%).tar.gz bin/*
 
 all: format build
 
