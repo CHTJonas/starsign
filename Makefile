@@ -97,13 +97,19 @@ build/openbsd/amd64: dir mod
 
 build/openbsd: build/openbsd/armv7 build/openbsd/arm64 build/openbsd/386 build/openbsd/amd64
 
+build/darwin/arm64: dir mod
+	export CGO_ENABLED=0
+	export GOOS=darwin
+	export GOARCH=arm64
+	$(GOBUILD) -o bin/starsign-darwin-$(VER:v%=%)-arm64 cmd/starsign/*.go
+
 build/darwin/amd64: dir mod
 	export CGO_ENABLED=0
 	export GOOS=darwin
 	export GOARCH=amd64
 	$(GOBUILD) -o bin/starsign-darwin-$(VER:v%=%)-amd64 cmd/starsign/*.go
 
-build/darwin: build/darwin/amd64
+build/darwin: build/darwin/arm64 build/darwin/amd64
 
 build/windows/386: dir mod
 	export CGO_ENABLED=0
