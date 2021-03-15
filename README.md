@@ -1,23 +1,22 @@
 # Starsign
 
-Starsign is the world's simplest tool to sign and verify file signatures to ensure authenticity.
+Starsign is the world's simplest tool to sign and verify file signatures to ensure authenticity. It generates a 64-byte BLAKE2 hash of the input data and signs this using the first SSH key that's loaded into your SSH agent.
 
-There's already a myriad of other crypto tools and libraries out there for managing digital signatures so why choose Starsign? Well, here are my motivations:
+## Motivations
+
+There's already a myriad of other cryptographic tools and libraries out there for managing digital signatures so why use something new? Here's a few of the reasons behind why I wrote Starsign:
 
 * I **don't** want to use anything PGP-based.
 * I want a tool that's written in a modern memory-safe language.
-* I want a tool that is easy to audit and has minimal third-party dependencies (i.e. StdLib only).
-* I want a tool that's totally idiot-proof. There should be one option to sign and one to verify. Nothing else.
+* I want a tool that is easy to audit and has minimal third-party dependencies (i.e. standard library only).
+* I want a tool that's as simple to use as possible. There should be one option to sign and one to verify. Nothing else.
 * I [already distribute](https://github.com/CHTJonas.keys) my SSH keys so let's reuse those for signing.
-* I use a [YubiKey](https://www.yubico.com/) with Filippo Valsorda's [SSH Agent](https://filippo.io/yubikey-agent) so let's integrate nicely with that.
 
-If you think those all sound like good ideas then Starsign may be for you.
-
-## How it works
-
-Starsign generates a 64-byte BLAKE2 hash of the input data and then signs this using the first SSH key that's available and loaded into your SSH agent. Make sure that the `SSH_AUTH_SOCK` variable contains the path to your agent's UNIX socket!
+If those all sound like good reasons then Starsign may be for you.
 
 ## Usage
+
+Make sure that the `SSH_AUTH_SOCK` environment variable contains the path to your agent's UNIX socket.
 
 ```
 Usage:
@@ -55,6 +54,7 @@ Example usage:
 ## Installation
 
 Pre-built binaries for a variety of operating systems and architectures are available to download from [GitHub Releases](https://github.com/CHTJonas/starsign/releases). I will generate a `SHA256SUMS` file and sign it using the SSH key that resides on my YubiKey and which has the following fingerprint (which you can cross-check [here](https://chtj2.user.srcf.net/identity/authorized_keys) and [here](https://github.com/CHTJonas.keys)):
+
 ```
 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBCsu/KmxxHvrQy4OorfEqF5zLfxk/QFDYs2MweLCvZjhkvUr6xKV6GXYH3W5Rq6BSKIzj3qqAB9yZ5G5oXXEjPs=
 ```
