@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/CHTJonas/starsign"
+	"golang.org/x/crypto/ssh"
 )
 
 var (
@@ -130,7 +131,18 @@ func sign() error {
 		out = f
 	}
 
-	sig, err := starsign.Sign(in)
+	var pubKey ssh.PublicKey
+	if pubKeyFlag != "" {
+		k := openFile(pubKeyFlag)
+		defer k.Close()
+		var err error
+		pubKey, err = starsign.ReadPubKeyFile(k)
+		if err != nil {
+			return err
+		}
+	}
+
+	sig, err := starsign.Sign(in, pubKey)
 	if err != nil {
 		return err
 	}

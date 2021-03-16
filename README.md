@@ -1,6 +1,6 @@
 # Starsign
 
-Starsign is the world's simplest tool to sign and verify file signatures to ensure authenticity. It generates a 64-byte BLAKE2 hash of the input data and signs this using the first SSH key that's loaded into your SSH agent.
+Starsign is the world's simplest tool to sign and verify file signatures to ensure authenticity. It generates a 64-byte BLAKE2 hash of the input data and signs this via your SSH agent, using either the first SSH key that's loaded or a specific key who's public key path you pass on the command line.
 
 ## Motivations
 
@@ -20,7 +20,7 @@ Make sure that the `SSH_AUTH_SOCK` environment variable contains the path to you
 
 ```
 Usage:
-    starsign -s [-o OUTPUT] INPUT
+    starsign -s [-p PUBLICKEY] [-o OUTPUT] INPUT
     starsign -v -p PUBLICKEY INPUT [SIGFILE]
 
 Mode flags:
@@ -31,7 +31,7 @@ Mode flags:
 
 Option flags:
     -o, --output OUTPUT         Write the signature to the file at path OUTPUT.
-    -p, --pubkey PUBLICKEY      Read in public key from the file at path PUBLICKEY.
+    -p, --pubkey PUBLICKEY      Use the public key from the file at path PUBLICKEY.
     --verbose                   Print verbose error messages when signing or verifying.
 
 In sign mode, Starsign takes an argument INPUT that determines the file to sign.

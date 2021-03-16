@@ -18,7 +18,7 @@ type Signature struct {
 	Type string
 }
 
-func Sign(in io.Reader) (*Signature, error) {
+func Sign(in io.Reader, pubKey ssh.PublicKey) (*Signature, error) {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
@@ -29,11 +29,25 @@ func Sign(in io.Reader) (*Signature, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Failed to list SSH keys: %v", err)
 	}
+	key := keys[0]
+	if pubKey != nil {
+		key = nil
+		pubKeyBytes := pubKey.Marshal()
+		for _, k := range keys {
+			if bytes.Equal(k.Marshal(), pubKeyBytes) {
+				key = k
+				break
+			}
+		}
+		if key == nil {
+			return nil, fmt.Errorf("Public key not found in agent")
+		}
+	}
 	hash, err := hash(in)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to hash data: %v", err)
 	}
-	sig, err := client.Sign(keys[0], hash)
+	sig, err := client.Sign(key, hash)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to sign data: %v", err)
 	}

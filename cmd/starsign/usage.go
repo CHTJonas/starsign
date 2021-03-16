@@ -1,7 +1,7 @@
 package main
 
 const usage = `Usage:
-    starsign -s [-o OUTPUT] INPUT
+    starsign -s [-p PUBLICKEY] [-o OUTPUT] INPUT
     starsign -v -p PUBLICKEY INPUT [SIGFILE]
 
 Mode flags:
@@ -12,7 +12,7 @@ Mode flags:
 
 Option flags:
     -o, --output OUTPUT         Write the signature to the file at path OUTPUT.
-    -p, --pubkey PUBLICKEY      Read in public key from the file at path PUBLICKEY.
+    -p, --pubkey PUBLICKEY      Use the public key from the file at path PUBLICKEY.
     --verbose                   Print verbose error messages when signing or verifying.
 
 In sign mode, Starsign takes an argument INPUT that determines the file to sign.
