@@ -3,9 +3,11 @@ SHELL := bash
 
 VER=$(shell git describe --tags --always --dirty)
 GO=$(shell which go)
+GOOPTS=-trimpath -mod=readonly -ldflags "-X main.version=$(VER)"
 GOMOD=$(GO) mod
 GOFMT=$(GO) fmt
-GOBUILD=$(GO) build -trimpath -mod=readonly -ldflags "-X main.version=$(VER)"
+GOTEST=$(GO) test $(GOOPTS)
+GOBUILD=$(GO) build $(GOOPTS)
 
 dir:
 	@if [ ! -d bin ]; then mkdir -p bin; fi
@@ -15,6 +17,9 @@ mod:
 
 format:
 	@$(GOFMT) ./...
+
+test:
+	$(GOTEST) -race -cover ./...
 
 build/linux/armv7: dir mod
 	export CGO_ENABLED=0
@@ -137,8 +142,13 @@ sign:
 archive:
 	tar -czf bin/starsign-$(VER:v%=%).tar.gz bin/*
 
-all: format build
+all:
+	@$(MAKE) format
+	@$(MAKE) test
+	@$(MAKE) build
 
 release:
-	make clean && make -j 6 all
-	make sign && make archive
+	@$(MAKE) clean
+	@$(MAKE) all
+	@$(MAKE) sign
+	@$(MAKE) archive
