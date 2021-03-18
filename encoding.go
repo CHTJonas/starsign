@@ -6,7 +6,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"io"
-	"io/ioutil"
 )
 
 const pemType = "STARSIGN SIGNATURE"
@@ -78,7 +77,7 @@ func EncodeSignature(out io.Writer, sig *Signature) error {
 }
 
 func DecodeSignature(in io.Reader) (sig *Signature, err error) {
-	data, err := ioutil.ReadAll(in)
+	data, err := io.ReadAll(in)
 	if err != nil {
 		return nil, err
 	}

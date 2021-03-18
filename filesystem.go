@@ -3,14 +3,13 @@ package starsign
 import (
 	"bufio"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"golang.org/x/crypto/ssh"
 )
 
 func ReadPubKeyFile(in io.Reader) (ssh.PublicKey, error) {
-	data, err := ioutil.ReadAll(in)
+	data, err := io.ReadAll(in)
 	if err != nil {
 		return nil, err
 	}
