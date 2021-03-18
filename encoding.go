@@ -4,13 +4,22 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/pem"
-	"fmt"
+	"errors"
 	"io"
 	"io/ioutil"
 )
 
+const pemType = "STARSIGN SIGNATURE"
+const blakeHashLength = 64
+const sigLenLength = 8
+
+var ErrMalformedSig = errors.New("Malformed signature data")
+var ErrSigDataTooShort = errors.New("Signature data too short")
+var ErrNotStarsignSig = errors.New("Not a Starsign signature")
+var ErrUntrustHeaders = errors.New("Signature contains untrusted headers")
+
 func serialise(sig *Signature) ([]byte, error) {
-	if len(sig.Hash) != 64 {
+	if len(sig.Hash) != blakeHashLength {
 		panic("Unexpected BLAKE2 hash length")
 	}
 	buf := new(bytes.Buffer)
@@ -37,12 +46,19 @@ func serialise(sig *Signature) ([]byte, error) {
 }
 
 func deserialise(data []byte) (*Signature, error) {
+	sigLenEnd := blakeHashLength + sigLenLength
+	if len(data) <= sigLenEnd {
+		return nil, ErrSigDataTooShort
+	}
 	sig := new(Signature)
-	sig.Hash = data[:64]
-	length := binary.LittleEndian.Uint64(data[64:72])
-	end := 72 + int(length)
-	sig.Sig = data[72:end]
-	sig.Type = string(data[end:])
+	sig.Hash = data[:blakeHashLength]
+	length := binary.LittleEndian.Uint64(data[blakeHashLength:sigLenEnd])
+	sigEnd := sigLenEnd + int(length)
+	if len(data) <= sigEnd {
+		return nil, ErrSigDataTooShort
+	}
+	sig.Sig = data[sigLenEnd:sigEnd]
+	sig.Type = string(data[sigEnd:])
 	return sig, nil
 }
 
@@ -52,7 +68,7 @@ func EncodeSignature(out io.Writer, sig *Signature) error {
 		return err
 	}
 	block := &pem.Block{
-		Type:  "STARSIGN SIGNATURE",
+		Type:  pemType,
 		Bytes: data,
 	}
 	if err = pem.Encode(out, block); err != nil {
@@ -69,15 +85,15 @@ func DecodeSignature(in io.Reader) (sig *Signature, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			sig = nil
-			err = fmt.Errorf("Malformed signature data")
+			err = ErrMalformedSig
 		}
 	}()
 	block, _ := pem.Decode(data)
-	if block.Type != "STARSIGN SIGNATURE" {
-		return nil, fmt.Errorf("Not a Starsign signature: %s", block.Type)
+	if block.Type != pemType {
+		return nil, ErrNotStarsignSig
 	}
 	if len(block.Headers) != 0 {
-		return nil, fmt.Errorf("Signature contains untrusted headers")
+		return nil, ErrUntrustHeaders
 	}
 	return deserialise(block.Bytes)
 }
