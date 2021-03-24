@@ -4,19 +4,21 @@ Starsign is the world's simplest tool to sign and verify file signatures to ensu
 
 ## Motivations
 
-There's already a myriad of other cryptographic tools and libraries out there for managing digital signatures so why use something new? Here's a few of the reasons behind why I wrote Starsign:
+There's already a myriad of other cryptographic tools and libraries out there for managing digital signatures so why use something new? Here's a few of my goals for Starsign:
 
-* I **don't** want to use anything PGP-based.
-* I want a tool that's written in a modern memory-safe language.
+* I want a tool that's as simple to use as possible with one command line flag to sign and one to verify.
+* I want a tool that's composable and works well with UNIX pipes or as a library for other Go applications.
+* I want a tool that has little, if any, configuration.
+* I want a tool that reuses my [already distributed SSH keys](https://github.com/CHTJonas.keys) for signing.
 * I want a tool that is easy to audit and has minimal third-party dependencies (i.e. standard library only).
-* I want a tool that's as simple to use as possible. There should be one option to sign and one to verify. Nothing else.
-* I [already distribute](https://github.com/CHTJonas.keys) my SSH keys so let's reuse those for signing.
+* I want a tool that's written in a modern memory-safe language and which is easy to cross-compile.
+* I **don't** want to use anything PGP-based.
 
-If those all sound like good reasons then Starsign may be for you.
+If those all seem like good ideas then Starsign may be for you.
 
 ## Usage
 
-Make sure that the `SSH_AUTH_SOCK` environment variable contains the path to your agent's UNIX socket.
+Make sure that the `SSH_AUTH_SOCK` environment variable contains the path to your agent's UNIX socket. Personally I use Filippo Valsorda's [yubikey-agent](https://github.com/FiloSottile/yubikey-agent) but it also works perfectly with OpenSSH's agent.
 
 ```
 Usage:
