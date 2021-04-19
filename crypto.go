@@ -13,8 +13,8 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
-var ErrPubKeyNotFound = errors.New("Public key not found in agent")
-var ErrHashMismatch = errors.New("Hash mismatch")
+var ErrPubKeyNotFound = errors.New("public key not found in agent")
+var ErrHashMismatch = errors.New("hash mismatch")
 
 type Signature struct {
 	Hash []byte
@@ -25,12 +25,12 @@ func Sign(in io.Reader, pubKey ssh.PublicKey) (*Signature, error) {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open SSH_AUTH_SOCK: %w", err)
+		return nil, fmt.Errorf("failed to open SSH_AUTH_SOCK: %w", err)
 	}
 	client := agent.NewClient(conn)
 	keys, err := client.List()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to list SSH keys: %w", err)
+		return nil, fmt.Errorf("failed to list SSH keys: %w", err)
 	}
 	key := keys[0]
 	if pubKey != nil {
@@ -48,11 +48,11 @@ func Sign(in io.Reader, pubKey ssh.PublicKey) (*Signature, error) {
 	}
 	hash, err := hash(in)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to hash data: %w", err)
+		return nil, fmt.Errorf("failed to hash data: %w", err)
 	}
 	sig, err := client.Sign(key, hash)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to sign data: %w", err)
+		return nil, fmt.Errorf("failed to sign data: %w", err)
 	}
 	return &Signature{
 		Hash: hash,
@@ -66,11 +66,11 @@ func Verify(in io.Reader, sig *Signature, key ssh.PublicKey) error {
 		Blob:   sig.Sig,
 	}
 	if err := key.Verify(sig.Hash, sshSig); err != nil {
-		return fmt.Errorf("Failed to verify signature: %w", err)
+		return fmt.Errorf("failed to verify signature: %w", err)
 	}
 	hash, err := hash(in)
 	if err != nil {
-		return fmt.Errorf("Failed to hash data: %w", err)
+		return fmt.Errorf("failed to hash data: %w", err)
 	}
 	if !bytes.Equal(hash, sig.Hash) {
 		return ErrHashMismatch

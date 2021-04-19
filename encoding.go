@@ -10,11 +10,11 @@ const pemType = "STARSIGN SIGNATURE"
 const blakeHashLength = 64
 const sigLenLength = 8
 
-var ErrHashWrongLength = errors.New("Unexpected BLAKE2 hash length")
-var ErrSigDataTooShort = errors.New("Signature data too short")
-var ErrMalformedSig = errors.New("Malformed signature data")
-var ErrNotStarsignSig = errors.New("Not a Starsign signature")
-var ErrUntrustHeaders = errors.New("Signature contains untrusted headers")
+var ErrHashWrongLength = errors.New("unexpected BLAKE2 hash length")
+var ErrSigDataTooShort = errors.New("signature data too short")
+var ErrMalformedSig = errors.New("malformed signature data")
+var ErrNotStarsignSig = errors.New("not a Starsign signature")
+var ErrUntrustHeaders = errors.New("signature contains untrusted headers")
 
 func serialise(sig *Signature) ([]byte, error) {
 	if len(sig.Hash) != blakeHashLength {
