@@ -19,7 +19,6 @@ var ErrHashMismatch = errors.New("Hash mismatch")
 type Signature struct {
 	Hash []byte
 	Sig  []byte
-	Type string
 }
 
 func Sign(in io.Reader, pubKey ssh.PublicKey) (*Signature, error) {
@@ -58,11 +57,17 @@ func Sign(in io.Reader, pubKey ssh.PublicKey) (*Signature, error) {
 	return &Signature{
 		Hash: hash,
 		Sig:  sig.Blob,
-		Type: sig.Format,
 	}, nil
 }
 
 func Verify(in io.Reader, sig *Signature, key ssh.PublicKey) error {
+	sshSig := &ssh.Signature{
+		Format: key.Type(),
+		Blob:   sig.Sig,
+	}
+	if err := key.Verify(sig.Hash, sshSig); err != nil {
+		return fmt.Errorf("Failed to verify signature: %w", err)
+	}
 	hash, err := hash(in)
 	if err != nil {
 		return fmt.Errorf("Failed to hash data: %w", err)
@@ -70,11 +75,7 @@ func Verify(in io.Reader, sig *Signature, key ssh.PublicKey) error {
 	if !bytes.Equal(hash, sig.Hash) {
 		return ErrHashMismatch
 	}
-	sshSig := &ssh.Signature{
-		Format: sig.Type,
-		Blob:   sig.Sig,
-	}
-	return key.Verify(hash[:], sshSig)
+	return nil
 }
 
 func hash(in io.Reader) ([]byte, error) {

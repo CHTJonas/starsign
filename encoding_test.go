@@ -20,9 +20,9 @@ func TestDecodeSignature(t *testing.T) {
 	if err != ErrUntrustHeaders {
 		t.Error("Untrusted PEM headers test failed")
 	}
-	_, err = DecodeSignature(makeReader(invalidSignatureTooShort1))
+	_, err = DecodeSignature(makeReader(invalidSignatureTooShort))
 	if err != ErrSigDataTooShort {
-		t.Error("Short signature decoding test 1 failed")
+		t.Error("Short signature decoding test failed")
 	}
 	_, err = DecodeSignature(makeReader(validSignature))
 	if err != nil {
@@ -34,13 +34,12 @@ func makeReader(str string) io.Reader {
 	return strings.NewReader(str)
 }
 
-var invalidSignatureNotStarsign = "-----BEGIN SOME OTHER SIGNATURE-----" + validSignature[34:259] + "-----END SOME OTHER SIGNATURE-----"
+var invalidSignatureNotStarsign = "-----BEGIN SOME OTHER SIGNATURE-----" + validSignature[34:222] + "-----END SOME OTHER SIGNATURE-----"
 var invalidSignatureHeader = validSignature[:35] + "Header: should be rejected\n" + validSignature[34:]
-var invalidSignatureTooShort1 = validSignature[:35] + "dGVzdA==" + validSignature[258:]
+var invalidSignatureTooShort = validSignature[:35] + "dGVzdA==" + validSignature[221:]
 
 var validSignature = `-----BEGIN STARSIGN SIGNATURE-----
-5bkdFcZkytSKgUHIfLkNkyXPI3OmksfExlDHyM+gnhd1v7MI+z7zI/IWv5MQh+C1
-bIyqPlVpLTj0zg8qOdPqsUgAAAAAAAAAAAAAIAcz+SjmZjstWGCRJuBkW2mLW4/P
-dNsdCnfRzi/gi33VAAAAIGKXuYKFbHKSWj876mabN7w7uYLmbuUpriaWtlw8BdY7
-ZWNkc2Etc2hhMi1uaXN0cDI1Ng==
+xOs34GI4L4ED9qGfD/oxXMlMCka227Dy9ei2m2XjkhGDXLYeYEWL9A8rCish77bC
+9HvQXj77SWY7oNnAhc2IIQAAACAweG0cWt9Pm3bvuqS7hr3qCxt9jVzmxpTE8M8A
+mOmS3wAAACAKaIJ1I5aRAFZkL7xM2dJ/lL5OUcxWZxhK6ilgCuHegw==
 -----END STARSIGN SIGNATURE-----`
