@@ -69,9 +69,7 @@ cd starsign
 make clean && make all
 ```
 
----
-
-### Copyright
+## Copyright
 
 Starsign is licensed under the [BSD 2-Clause License](https://opensource.org/licenses/BSD-2-Clause).
 
